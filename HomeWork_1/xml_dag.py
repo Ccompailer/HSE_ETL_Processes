@@ -20,7 +20,6 @@ def nutrition_dag():
 
         rows = []
         for food in root.findall('food'):
-            # Извлекаем данные, используя .findtext() для тегов и .get() для атрибутов
             item = {
                 'name': food.findtext('name'),
                 'mfr': food.findtext('mfr'),
@@ -34,21 +33,19 @@ def nutrition_dag():
                 'protein': int(float(food.findtext('protein', 0))),
             }
 
-            # Собираем Витамины в JSONB (словарь)
             vits_node = food.find('vitamins')
             vitamins_data = {}
             if vits_node is not None:
                 for child in vits_node:
                     vitamins_data[child.tag] = int(child.text)
-            item['vitamins'] = json.dumps(vitamins_data)  # Конвертируем в строку для БД
+            item['vitamins'] = json.dumps(vitamins_data)
 
-            # Собираем Минералы в JSONB (словарь)
             mins_node = food.find('minerals')
             minerals_data = {}
             if mins_node is not None:
                 for child in mins_node:
                     minerals_data[child.tag] = int(child.text)
-            item['minerals'] = json.dumps(minerals_data)  # Конвертируем в строку для БД
+            item['minerals'] = json.dumps(minerals_data)
 
             rows.append(item)
 
@@ -65,7 +62,6 @@ def nutrition_dag():
         engine = hook.get_sqlalchemy_engine()
         df.to_sql('data_from_xml', con=engine, if_exists='append', index=False)
 
-    # Путь к файлу, который вы скопировали через docker cp
     file_path = "{{ dag_run.conf.get('file_path', '/tmp/nutrition.xml') }}"
 
     parsed_data = parse_nutrition_xml(file_path)
